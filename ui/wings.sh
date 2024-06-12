@@ -33,7 +33,7 @@ fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* HATA: Lib betigi yuklenemedi" && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -60,12 +60,12 @@ export MYSQL_DBHOST_PASSWORD=""
 
 ask_letsencrypt() {
   if [ "$CONFIGURE_UFW" == false ] && [ "$CONFIGURE_FIREWALL_CMD" == false ]; then
-    warning "Let's Encrypt requires port 80/443 to be opened! You have opted out of the automatic firewall configuration; use this at your own risk (if port 80/443 is closed, the script will fail)!"
+    warning "Let's Encrypt 80/443 numarali portun acilmasini gerektirir! Otomatik guvenlik duvari yapilandirmasini devre disi biraktiniz; bunu kendi sorumlulugunuzda kullanin (80/443 numarali baglanti noktasi kapaliysa, komut dosyasi basarisiz olur)!"
   fi
 
-  warning "You cannot use Let's Encrypt with your hostname as an IP address! It must be a FQDN (e.g. node.example.org)."
+  warning "Let's Encrypt'i IP adresi olarak ana bilgisayar adinizla kullanamazsiniz! Bu bir FQDN olmalidir (orn. node.example.org)."
 
-  echo -e -n "* Do you want to automatically configure HTTPS using Let's Encrypt? (y/N): "
+  echo -e -n "* Let's Encrypt kullanarak HTTPS'yi otomatik olarak yapilandirmak istiyor musunuz? (y/N): "
   read -r CONFIRM_SSL
 
   if [[ "$CONFIRM_SSL" =~ [Yy] ]]; then
@@ -74,7 +74,7 @@ ask_letsencrypt() {
 }
 
 ask_database_user() {
-  echo -n "* Do you want to automatically configure a user for database hosts? (y/N): "
+  echo -n "* Veritabani ana bilgisayarlari icin otomatik olarak bir kullanici yapilandirmak istiyor musunuz? (y/N): "
   read -r CONFIRM_DBHOST
 
   if [[ "$CONFIRM_DBHOST" =~ [Yy] ]]; then
@@ -84,11 +84,11 @@ ask_database_user() {
 }
 
 ask_database_external() {
-  echo -n "* Do you want to configure MySQL to be accessed externally? (y/N): "
+  echo -n "* MySQL'i harici olarak erisilecek sekilde yapilandirmak istiyor musunuz? (y/N): "
   read -r CONFIRM_DBEXTERNAL
 
   if [[ "$CONFIRM_DBEXTERNAL" =~ [Yy] ]]; then
-    echo -n "* Enter the panel address (blank for any address): "
+    echo -n "* Panel adresini girin (herhangi bir adres için bos): "
     read -r CONFIRM_DBEXTERNAL_HOST
     if [ "$CONFIRM_DBEXTERNAL_HOST" == "" ]; then
       MYSQL_DBHOST_HOST="%"
@@ -101,8 +101,8 @@ ask_database_external() {
 }
 
 ask_database_firewall() {
-  warning "Allow incoming traffic to port 3306 (MySQL) can potentially be a security risk, unless you know what you are doing!"
-  echo -n "* Would you like to allow incoming traffic to port 3306? (y/N): "
+  warning "Ne yaptiğinizi bilmiyorsaniz, 3306 (MySQL) portuna gelen trafige izin vermek potansiyel olarak bir guvenlik riski olusturabilir!"
+  echo -n "* 3306 numarali baglanti noktasina gelen trafige izin vermek ister misiniz? (y/N): "
   read -r CONFIRM_DB_FIREWALL
   if [[ "$CONFIRM_DB_FIREWALL" =~ [Yy] ]]; then
     CONFIGURE_DB_FIREWALL=true
@@ -116,11 +116,11 @@ ask_database_firewall() {
 main() {
   # check if we can detect an already existing installation
   if [ -d "/etc/pterodactyl" ]; then
-    warning "The script has detected that you already have Pterodactyl wings on your system! You cannot run the script multiple times, it will fail!"
-    echo -e -n "* Are you sure you want to proceed? (y/N): "
+    warning "Betik, sisteminizde zaten Pterodactyl kanatlari oldugunu tespit etti! Betigi birden fazla kez calistiramazsiniz, basarisiz olur!"
+    echo -e -n "* Devam etmek istiyor musun? (y/N): "
     read -r CONFIRM_PROCEED
     if [[ ! "$CONFIRM_PROCEED" =~ [Yy] ]]; then
-      error "Installation aborted!"
+      error "Kurulum iptal edildi!"
       exit 1
     fi
   fi
@@ -129,15 +129,15 @@ main() {
 
   check_virt
 
-  echo "* "
-  echo "* The installer will install Docker, required dependencies for Wings"
-  echo "* as well as Wings itself. But it's still required to create the node"
-  echo "* on the panel and then place the configuration file on the node manually after"
-  echo "* the installation has finished. Read more about this process on the"
-  echo "* official documentation: $(hyperlink 'https://pterodactyl.io/wings/1.0/installing.html#configure')"
-  echo "* "
-  echo -e "* ${COLOR_RED}Note${COLOR_NC}: this script will not start Wings automatically (will install systemd service, not start it)."
-  echo -e "* ${COLOR_RED}Note${COLOR_NC}: this script will not enable swap (for docker)."
+  echo "*"
+  echo "* Yukleyici Docker'i ve Wings icin gerekli bagimliliklari yukleyecektir"
+  echo "* yani sira Wings'in kendisi. Ancak dugumu olusturmak icin yine de gereklidir"
+  echo "* panelde ve ardindan yapilandırma dosyasini dugume manuel olarak yerlestirin"
+  echo "* kurulum tamamlandi. Bu islem hakkinda daha fazla bilgi icin"
+  echo "* resmi belgeler: $(hyperlink 'https://pterodactyl.io/wings/1.0/installing.html#configure')"
+  echo "*"
+  echo -e "* ${COLOR_RED}Not${COLOR_NC}: bu betik Wings'i otomatik olarak baslatmayacaktir (systemd hizmetini kuracak, baslatmayacaktir)."
+  echo -e "* ${COLOR_RED}Not${COLOR_NC}: bu betik takasi etkinlestirmeyecektir (docker icin)."
   print_brake 42
 
   ask_firewall CONFIGURE_FIREWALL
@@ -153,28 +153,28 @@ main() {
 
     MYSQL_DBHOST_USER="-"
     while [[ "$MYSQL_DBHOST_USER" == *"-"* ]]; do
-      required_input MYSQL_DBHOST_USER "Database host username (pterodactyluser): " "" "pterodactyluser"
-      [[ "$MYSQL_DBHOST_USER" == *"-"* ]] && error "Database user cannot contain hyphens"
+      required_input MYSQL_DBHOST_USER "Veritabani kullanici adi (pterodactyluser): " "" "pterodactyluser"
+      [[ "$MYSQL_DBHOST_USER" == *"-"* ]] && error "Veritabani kullanicisi kisa cizgi iceremez"
     done
 
-    password_input MYSQL_DBHOST_PASSWORD "Database host password: " "Password cannot be empty"
+    password_input MYSQL_DBHOST_PASSWORD "Veritabani sifresi: " "Sifre bos olamaz"
   fi
 
   ask_letsencrypt
 
   if [ "$CONFIGURE_LETSENCRYPT" == true ]; then
     while [ -z "$FQDN" ]; do
-      echo -n "* Set the FQDN to use for Let's Encrypt (node.example.com): "
+      echo -n "* Let's Encrypt icin kullanilacak FQDN'yi ayarlayin (node.example.com): "
       read -r FQDN
 
       ASK=false
 
-      [ -z "$FQDN" ] && error "FQDN cannot be empty"                                                            # check if FQDN is empty
+      [ -z "$FQDN" ] && error "FQDN bos olamaz"                                                            # check if FQDN is empty
       bash <(curl -s "$GITHUB_URL"/lib/verify-fqdn.sh) "$FQDN" || ASK=true                                      # check if FQDN is valid
-      [ -d "/etc/letsencrypt/live/$FQDN/" ] && error "A certificate with this FQDN already exists!" && ASK=true # check if cert exists
+      [ -d "/etc/letsencrypt/live/$FQDN/" ] && error "Bu FQDN'ye sahip bir sertifika zaten mevcut!" && ASK=true # check if cert exists
 
       [ "$ASK" == true ] && FQDN=""
-      [ "$ASK" == true ] && echo -e -n "* Do you still want to automatically configure HTTPS using Let's Encrypt? (y/N): "
+      [ "$ASK" == true ] && echo -e -n "* Hala Let's Encrypt kullanarak HTTPS'yi otomatik olarak yapilandirmak istiyor musunuz? (y/N): "
       [ "$ASK" == true ] && read -r CONFIRM_SSL
 
       if [[ ! "$CONFIRM_SSL" =~ [Yy] ]] && [ "$ASK" == true ]; then
@@ -187,20 +187,20 @@ main() {
   if [ "$CONFIGURE_LETSENCRYPT" == true ]; then
     # set EMAIL
     while ! valid_email "$EMAIL"; do
-      echo -n "* Enter email address for Let's Encrypt: "
+      echo -n "* Let's Encrypt icin e-posta adresinizi girin: "
       read -r EMAIL
 
-      valid_email "$EMAIL" || error "Email cannot be empty or invalid"
+      valid_email "$EMAIL" || error "E-posta bos veya gecersiz olamaz"
     done
   fi
 
-  echo -n "* Proceed with installation? (y/N): "
+  echo -n "* Kuruluma devam edin? (y/N): "
 
   read -r CONFIRM
   if [[ "$CONFIRM" =~ [Yy] ]]; then
     run_installer "wings"
   else
-    error "Installation aborted."
+    error "Kurulum iptal edildi."
     exit 1
   fi
 }
@@ -208,24 +208,24 @@ main() {
 function goodbye {
   echo ""
   print_brake 70
-  echo "* Wings installation completed"
+  echo "* Wings kurulumu tamamlandi"
   echo "*"
-  echo "* To continue, you need to configure Wings to run with your panel"
-  echo "* Please refer to the official guide, $(hyperlink 'https://pterodactyl.io/wings/1.0/installing.html#configure')"
+  echo "* Devam etmek icin Wings'i panelinizle calisacak sekilde yapilandirmaniz gerekir"
+  echo "* Lutfen resmi kilavuza bakin, $(hyperlink 'https://pterodactyl.io/wings/1.0/installing.html#configure')"
   echo "* "
-  echo "* You can either copy the configuration file from the panel manually to /etc/pterodactyl/config.yml"
-  echo "* or, you can use the \"auto deploy\" button from the panel and simply paste the command in this terminal"
+  echo "* Yapilandirma dosyasini panelden manuel olarak /etc/pterodactyl/config.yml dosyasina kopyalayabilirsiniz"
+  echo "* veya, panelden \"auto deploy\" dugmesini kullanabilir ve komutu bu terminale yapistirabilirsiniz"
   echo "* "
-  echo "* You can then start Wings manually to verify that it's working"
+  echo "* Daha sonra calistigini dogrulamak icin Wings'i manuel olarak baslatabilirsiniz"
   echo "*"
   echo "* sudo wings"
   echo "*"
-  echo "* Once you have verified that it is working, use CTRL+C and then start Wings as a service (runs in the background)"
+  echo "* Calistigini dogruladiktan sonra CTRL+C tuslarini kullanin ve ardindan Wings'i bir hizmet olarak baslatin (arka planda calisir)"
   echo "*"
   echo "* systemctl start wings"
   echo "*"
-  echo -e "* ${COLOR_RED}Note${COLOR_NC}: It is recommended to enable swap (for Docker, read more about it in official documentation)."
-  [ "$CONFIGURE_FIREWALL" == false ] && echo -e "* ${COLOR_RED}Note${COLOR_NC}: If you haven't configured your firewall, ports 8080 and 2022 needs to be open."
+  echo -e "* ${COLOR_RED}Not${COLOR_NC}: Takasin etkinlestirilmesi onerilir (Docker icin, resmi belgelerde bu konuda daha fazla bilgi edinin)."
+[ "$CONFIGURE_FIREWALL" == false ] && echo -e "* ${COLOR_RED}Not${COLOR_NC}: Guvenlik duvarinizi yapilandirmadıysaniz, 8080 ve 2022 numarali baglanti noktalarinin acik olmasi gerekir."
   print_brake 70
   echo ""
 }
