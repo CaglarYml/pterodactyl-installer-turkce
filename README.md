@@ -61,7 +61,7 @@ _\* Indicates an operating system and release that previously was supported by t
 Kurulum betiklerini kullanmak için bu komutu root olarak çalıştırmanız yeterlidir. Betik size sadece paneli mi, sadece Wings'i mi yoksa her ikisini de mi kurmak istediğinizi soracaktır.
 
 ```bash
-bash <(curl -s https://pterodactyl-installer.se)
+bash <(curl -s https://raw.githubusercontent.com/CaglarYml/pterodactyl-installer-turkce/master/install.sh
 ```
 
 _Not: Bazı sistemlerde, tek satırlık komutu çalıştırmadan önce root olarak oturum açmış olmanız gerekir (komutun önünde `sudo` varsa çalışmaz)._
