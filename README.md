@@ -1,7 +1,7 @@
 # :bird: Pterodactyl Kurulum Betiği
 
 
-# Henüz hazır değildir!
+##Hatalar olabileceğini unutmayın!
 
 
 
