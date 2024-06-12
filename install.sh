@@ -30,14 +30,14 @@ set -e
 
 export GITHUB_SOURCE="v1.0.0"
 export SCRIPT_RELEASE="v1.0.0"
-export GITHUB_BASE_URL="https://raw.githubusercontent.com/pterodactyl-installer/pterodactyl-installer"
+export GITHUB_BASE_URL="https://raw.githubusercontent.com/CaglarYml/pterodactyl-installer-turkce"
 
 LOG_PATH="/var/log/pterodactyl-installer.log"
 
 # curl için kontrol edin
 if ! [ -x "$(command -v curl)" ]; then
-  echo "* Bu betiğin çalışması için curl gereklidir."
-  echo "* apt (Debian ve türevleri) veya yum/dnf (CentOS) kullanarak yükleyin"
+  echo "* Bu betigin calismasi icin curl gereklidir."
+  echo "* apt (Debian ve turevleri) veya yum/dnf (CentOS) kullanarak yukleyin"
   exit 1
 fi
 
@@ -60,7 +60,7 @@ execute() {
     if [[ "$CONFIRM" =~ [Yy] ]]; then
       execute "$2"
     else
-      error "Installation of $2 aborted."
+      error "Kurulum $2 iptal edildi."
       exit 1
     fi
   fi
