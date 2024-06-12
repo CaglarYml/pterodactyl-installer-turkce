@@ -47,7 +47,7 @@ MYSQL_USER="${MYSQL_USER:-pterodactyl}"
 MYSQL_PASSWORD="${MYSQL_PASSWORD:-$(gen_passwd 64)}"
 
 # Environment
-timezone="${timezone:-Europe/Stockholm}"
+timezone="${timezone:-Europe/Istanbul}"
 
 # Assume SSL, will fetch different config if true
 ASSUME_SSL="${ASSUME_SSL:-false}"
@@ -65,45 +65,45 @@ user_lastname="${user_lastname:-}"
 user_password="${user_password:-}"
 
 if [[ -z "${email}" ]]; then
-  error "Email is required"
+  error "E-posta gereklidir"
   exit 1
 fi
 
 if [[ -z "${user_email}" ]]; then
-  error "User email is required"
+  error "Kullanici e-postasi gereklidir"
   exit 1
 fi
 
 if [[ -z "${user_username}" ]]; then
-  error "User username is required"
+  error "Kullanici rumuzu gereklidir"
   exit 1
 fi
 
 if [[ -z "${user_firstname}" ]]; then
-  error "User firstname is required"
+  error "Kullanici adi gereklidir"
   exit 1
 fi
 
 if [[ -z "${user_lastname}" ]]; then
-  error "User lastname is required"
+  error "Kullanici soyadi gereklidir"
   exit 1
 fi
 
 if [[ -z "${user_password}" ]]; then
-  error "User password is required"
+  error "Kullanıcı şifresi gereklidir"
   exit 1
 fi
 
 # --------- Main installation functions -------- #
 
 install_composer() {
-  output "Installing composer.."
+  output "Composer yukleniyor.."
   curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-  success "Composer installed!"
+  success "Composer yuklendi!"
 }
 
 ptdl_dl() {
-  output "Downloading pterodactyl panel files .. "
+  output "Pterodactyl panel dosyaları yukleniyor .. "
   mkdir -p /var/www/pterodactyl
   cd /var/www/pterodactyl || exit
 
@@ -113,11 +113,11 @@ ptdl_dl() {
 
   cp .env.example .env
 
-  success "Downloaded pterodactyl panel files!"
+  success "Pterodactyl panel dosyaları yuklendi!"
 }
 
 install_composer_deps() {
-  output "Installing composer dependencies.."
+  output "Composer bağımlılıkları yükleniyor.."
   [ "$OS" == "rocky" ] || [ "$OS" == "almalinux" ] && export PATH=/usr/local/bin:$PATH
   COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
   success "Installed composer dependencies!"
@@ -125,7 +125,7 @@ install_composer_deps() {
 
 # Configure environment
 configure() {
-  output "Configuring environment.."
+  output "Composer bağımlılıkları yüklendi.."
 
   local app_url="http://$FQDN"
   [ "$ASSUME_SSL" == true ] && app_url="https://$FQDN"
@@ -167,7 +167,7 @@ configure() {
     --password="$user_password" \
     --admin=1
 
-  success "Configured environment!"
+  success "Ortam konfigure edildi!"
 }
 
 # set the correct folder permissions depending on OS and webserver
@@ -184,18 +184,18 @@ set_folder_permissions() {
 }
 
 insert_cronjob() {
-  output "Installing cronjob.. "
+  output "Cronjob yukleniyor.. "
 
   crontab -l | {
     cat
     output "* * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1"
   } | crontab -
 
-  success "Cronjob installed!"
+  success "Cronjob yuklendi!"
 }
 
 install_pteroq() {
-  output "Installing pteroq service.."
+  output "pteroq servisi kuruluyor.."
 
   curl -o /etc/systemd/system/pteroq.service "$GITHUB_URL"/configs/pteroq.service
 
@@ -211,7 +211,7 @@ install_pteroq() {
   systemctl enable pteroq.service
   systemctl start pteroq
 
-  success "Installed pteroq!"
+  success "pteroq servisi kuruldu!"
 }
 
 # -------- OS specific install functions ------- #
@@ -276,7 +276,7 @@ alma_rocky_dep() {
 }
 
 dep_install() {
-  output "Installing dependencies for $OS $OS_VER..."
+  output "$OS $OS_VER icin bagimliliklar yukleniyor..."
 
   # Update repos before installing
   update_repos
@@ -324,31 +324,31 @@ dep_install() {
 
   enable_services
 
-  success "Dependencies installed!"
+  success "Bagimliliklar yuklendi!"
 }
 
 # --------------- Other functions -------------- #
 
 firewall_ports() {
-  output "Opening ports: 22 (SSH), 80 (HTTP) and 443 (HTTPS)"
+  output "Acilan portlar: 22 (SSH), 80 (HTTP) and 443 (HTTPS)"
 
   firewall_allow_ports "22 80 443"
 
-  success "Firewall ports opened!"
+  success "Guvenlik duvarinda portlari acildi!"
 }
 
 letsencrypt() {
   FAILED=false
 
-  output "Configuring Let's Encrypt..."
+  output "Let's Encrypt konfigure ediliyor..."
 
   # Obtain certificate
   certbot --nginx --redirect --no-eff-email --email "$email" -d "$FQDN" || FAILED=true
 
   # Check if it succeded
   if [ ! -d "/etc/letsencrypt/live/$FQDN/" ] || [ "$FAILED" == true ]; then
-    warning "The process of obtaining a Let's Encrypt certificate failed!"
-    echo -n "* Still assume SSL? (y/N): "
+    warning "Let's Encrypt sertifikası olusturulamadi!"
+    echo -n "* Hala SSL almak istiyor musunuz? (y/N): "
     read -r CONFIGURE_SSL
 
     if [[ "$CONFIGURE_SSL" =~ [Yy] ]]; then
@@ -360,14 +360,14 @@ letsencrypt() {
       CONFIGURE_LETSENCRYPT=false
     fi
   else
-    success "The process of obtaining a Let's Encrypt certificate succeeded!"
+    success "Let's Encrypt sertifikasi olusturuldu!"
   fi
 }
 
 # ------ Webserver configuration functions ----- #
 
 configure_nginx() {
-  output "Configuring nginx .."
+  output "Nginx konfigure ediliyor .."
 
   if [ "$ASSUME_SSL" == true ] && [ "$CONFIGURE_LETSENCRYPT" == false ]; then
     DL_FILE="nginx_ssl.conf"
@@ -406,13 +406,13 @@ configure_nginx() {
     systemctl restart nginx
   fi
 
-  success "Nginx configured!"
+  success "Nginx konfigure edildi!"
 }
 
 # --------------- Main functions --------------- #
 
 perform_install() {
-  output "Starting installation.. this might take a while!"
+  output "Kurulum baslatiliyor.. Biraz surecektir!"
   dep_install
   install_composer
   ptdl_dl
