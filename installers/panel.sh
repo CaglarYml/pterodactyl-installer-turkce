@@ -33,7 +33,7 @@ fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* HATA: Lib betigi yuklenemedi" && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -90,7 +90,7 @@ if [[ -z "${user_lastname}" ]]; then
 fi
 
 if [[ -z "${user_password}" ]]; then
-  error "Kullanıcı şifresi gereklidir"
+  error "Kullanici sifresi gereklidir"
   exit 1
 fi
 
@@ -113,19 +113,19 @@ ptdl_dl() {
 
   cp .env.example .env
 
-  success "Pterodactyl panel dosyaları yuklendi!"
+  success "Pterodactyl panel dosyalari yuklendi!"
 }
 
 install_composer_deps() {
-  output "Composer bağımlılıkları yükleniyor.."
+  output "Composer bagimliliklari yukleniyor.."
   [ "$OS" == "rocky" ] || [ "$OS" == "almalinux" ] && export PATH=/usr/local/bin:$PATH
   COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
-  success "Installed composer dependencies!"
+  success "Composer bagimliliklari yuklendi!"
 }
 
 # Configure environment
 configure() {
-  output "Composer bağımlılıkları yüklendi.."
+  output "Composer bagimliliklari yuklendi.."
 
   local app_url="http://$FQDN"
   [ "$ASSUME_SSL" == true ] && app_url="https://$FQDN"
