@@ -33,7 +33,7 @@ fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* HATA: Lib betigi yuklenemedi" && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -47,34 +47,34 @@ main() {
   welcome ""
 
   if [ -d "/var/www/pterodactyl" ]; then
-    output "Panel installation has been detected."
-    echo -e -n "* Do you want to remove panel? (y/N): "
+    output "Panel kurulumu tespit edildi."
+    echo -e -n "* Paneli kaldirmak istiyor musunuz? (y/N): "
     read -r RM_PANEL_INPUT
     [[ "$RM_PANEL_INPUT" =~ [Yy] ]] && RM_PANEL=true
   fi
 
   if [ -d "/etc/pterodactyl" ]; then
-    output "Wings installation has been detected."
-    warning "This will remove all the servers!"
-    echo -e -n "* Do you want to remove Wings (daemon)? (y/N): "
+    output "Wings kurulumu tespit edildi."
+    warning "Bu, tum sunuculari kaldiracaktir!"
+    echo -e -n "* Wings'i (daemon) kaldirmak mi istiyorsunuz? (y/N): "
     read -r RM_WINGS_INPUT
     [[ "$RM_WINGS_INPUT" =~ [Yy] ]] && RM_WINGS=true
   fi
 
   if [ "$RM_PANEL" == false ] && [ "$RM_WINGS" == false ]; then
-    error "Nothing to uninstall!"
+    error "Kaldirilacak bir sey yok!"
     exit 1
   fi
 
   summary
 
   # confirm uninstallation
-  echo -e -n "* Continue with uninstallation? (y/N): "
+  echo -e -n "* Kaldirma islemine devam edin? (y/N): "
   read -r CONFIRM
   if [[ "$CONFIRM" =~ [Yy] ]]; then
     run_installer "uninstall"
   else
-    error "Uninstallation aborted."
+    error "Kaldirma islemi iptal edildi."
     exit 1
   fi
 }
@@ -88,9 +88,9 @@ summary() {
 
 goodbye() {
   print_brake 62
-  [ "$RM_PANEL" == true ] && output "Panel uninstallation completed"
-  [ "$RM_WINGS" == true ] && output "Wings uninstallation completed"
-  output "Thank you for using this script."
+  [ "$RM_PANEL" == true ] && output "Panel kaldirma islemi tamamlandi"
+  [ "$RM_WINGS" == true ] && output "Wings kaldirma islemi tamamlandi"
+  output "Bu betigi kullandiginiz icin tesekkur ederiz."
   print_brake 62
 }
 
