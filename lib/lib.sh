@@ -81,19 +81,19 @@ output() {
 
 success() {
   echo ""
-  output "${COLOR_GREEN}SUCCESS${COLOR_NC}: $1"
+  output "${COLOR_GREEN}BASARILI${COLOR_NC}: $1"
   echo ""
 }
 
 error() {
   echo ""
-  echo -e "* ${COLOR_RED}ERROR${COLOR_NC}: $1" 1>&2
+  echo -e "* ${COLOR_RED}HATA${COLOR_NC}: $1" 1>&2
   echo ""
 }
 
 warning() {
   echo ""
-  output "${COLOR_YELLOW}WARNING${COLOR_NC}: $1"
+  output "${COLOR_YELLOW}UYARI${COLOR_NC}: $1"
   echo ""
 }
 
@@ -122,18 +122,21 @@ welcome() {
   get_latest_versions
 
   print_brake 70
-  output "Pterodactyl panel installation script @ $SCRIPT_RELEASE"
+  output "Pterodactyl Panel Kurulum Betigi @ $SCRIPT_RELEASE"
   output ""
-  output "Copyright (C) 2018 - 2024, Vilhelm Prytz, <vilhelm@prytznet.se>"
+  output "Telif hakki saklidir. (C) 2018 - 2024, Vilhelm Prytz, <vilhelm@prytznet.se>"
   output "https://github.com/pterodactyl-installer/pterodactyl-installer"
   output ""
-  output "This script is not associated with the official Pterodactyl Project."
+  output "CaglarYml tarafindan Turkcelestirilmistir."
+  output "https://github.com/CaglarYml/pterodactyl-installer-turkce"
   output ""
-  output "Running $OS version $OS_VER."
+  output "Bu betik resmi Pterodactyl Projesi ile iliskili degildir."
+  output ""
+  output "Isletim Sistemi: $OS , Versiyon: $OS_VER."
   if [ "$1" == "panel" ]; then
-    output "Latest pterodactyl/panel is $PTERODACTYL_PANEL_VERSION"
+    output "En son pterodactyl/panel surumu: $PTERODACTYL_PANEL_VERSION"
   elif [ "$1" == "wings" ]; then
-    output "Latest pterodactyl/wings is $PTERODACTYL_WINGS_VERSION"
+    output "En son pterodactyl/wings surumu: $PTERODACTYL_WINGS_VERSION"
   fi
   print_brake 70
 }
@@ -147,7 +150,7 @@ get_latest_release() {
 }
 
 get_latest_versions() {
-  output "Retrieving release information..."
+  output "Surum bilgisi aliniyor..."
   PTERODACTYL_PANEL_VERSION=$(get_latest_release "pterodactyl/panel")
   PTERODACTYL_WINGS_VERSION=$(get_latest_release "pterodactyl/wings")
 }
@@ -200,12 +203,12 @@ create_db_user() {
   local db_user_password="$2"
   local db_host="${3:-127.0.0.1}"
 
-  output "Creating database user $db_user_name..."
+  output "Veritabani kullanicisi olusturuluyor. $db_user_name..."
 
   mariadb -u root -e "CREATE USER '$db_user_name'@'$db_host' IDENTIFIED BY '$db_user_password';"
   mariadb -u root -e "FLUSH PRIVILEGES;"
 
-  output "Database user $db_user_name created"
+  output "Veritabani kullanicisi $db_user_name olusturuldu."
 }
 
 grant_all_privileges() {
@@ -213,12 +216,12 @@ grant_all_privileges() {
   local db_user_name="$2"
   local db_host="${3:-127.0.0.1}"
 
-  output "Granting all privileges on $db_name to $db_user_name..."
+  output "$db_name uzerinde $db_user_name kullanicisina tum izinler veriliyor..."
 
   mariadb -u root -e "GRANT ALL PRIVILEGES ON $db_name.* TO '$db_user_name'@'$db_host' WITH GRANT OPTION;"
   mariadb -u root -e "FLUSH PRIVILEGES;"
 
-  output "Privileges granted"
+  output "izinler verildi."
 
 }
 
@@ -227,12 +230,12 @@ create_db() {
   local db_user_name="$2"
   local db_host="${3:-127.0.0.1}"
 
-  output "Creating database $db_name..."
+  output "Veritabani olusturuluyor. $db_name..."
 
   mariadb -u root -e "CREATE DATABASE $db_name;"
   grant_all_privileges "$db_name" "$db_user_name" "$db_host"
 
-  output "Database $db_name created"
+  output "Veritabani $db_name olusturuldu."
 }
 
 # --------------- Package Manager -------------- #
@@ -349,7 +352,7 @@ ask_firewall() {
 
   case "$OS" in
   ubuntu | debian)
-    echo -e -n "* Do you want to automatically configure UFW (firewall)? (y/N): "
+    echo -e -n "* UFW'yi (guvenlik duvari) otomatik olarak yapilandirmak istiyor musun? (y/N): "
     read -r CONFIRM_UFW
 
     if [[ "$CONFIRM_UFW" =~ [Yy] ]]; then
@@ -357,7 +360,7 @@ ask_firewall() {
     fi
     ;;
   rocky | almalinux)
-    echo -e -n "* Do you want to automatically configure firewall-cmd (firewall)? (y/N): "
+    echo -e -n "* Firewall-cmd'yi (guvenlik duvari) otomatik olarak yapilandirmak istiyor musun? (y/N): "
     read -r CONFIRM_FIREWALL_CMD
 
     if [[ "$CONFIRM_FIREWALL_CMD" =~ [Yy] ]]; then
@@ -371,7 +374,7 @@ install_firewall() {
   case "$OS" in
   ubuntu | debian)
     output ""
-    output "Installing Uncomplicated Firewall (UFW)"
+    output "Uncomplicated Firewall (UFW) kuruluyor..."
 
     if ! [ -x "$(command -v ufw)" ]; then
       update_repos true
@@ -380,13 +383,13 @@ install_firewall() {
 
     ufw --force enable
 
-    success "Enabled Uncomplicated Firewall (UFW)"
+    success "Uncomplicated Firewall (UFW) aktiflestirildi."
 
     ;;
   rocky | almalinux)
 
     output ""
-    output "Installing FirewallD"+
+    output "FirewallD yukleniyor..."+
 
     if ! [ -x "$(command -v firewall-cmd)" ]; then
       install_packages "firewalld" true
@@ -394,7 +397,7 @@ install_firewall() {
 
     systemctl --now enable firewalld >/dev/null
 
-    success "Enabled FirewallD"
+    success "FirewallD aktiflestirildi."
 
     ;;
   esac
@@ -422,14 +425,14 @@ firewall_allow_ports() {
 # panel x86_64 check
 check_os_x86_64() {
   if [ "${ARCH}" != "amd64" ]; then
-    warning "Detected CPU architecture $CPU_ARCHITECTURE"
-    warning "Using any other architecture than 64 bit (x86_64) will cause problems."
+    warning "CPU mimarisi ALGILANDI: $CPU_ARCHITECTURE"
+    warning "64 bit (x86_64) disinda herhangi bir mimarinin kullanilmasi sorunlara neden olacaktir."
 
-    echo -e -n "* Are you sure you want to proceed? (y/N):"
+    echo -e -n "* Devam etmek istediğinizden emin misiniz? (y/N):"
     read -r choice
 
     if [[ ! "$choice" =~ [Yy] ]]; then
-      error "Installation aborted!"
+      error "Kurulum iptal edildi!"
       exit 1
     fi
   fi
@@ -437,7 +440,7 @@ check_os_x86_64() {
 
 # wings virtualization check
 check_virt() {
-  output "Installing virt-what..."
+  output "virt-what kuruluyor..."
 
   update_repos true
   install_packages "virt-what" true
@@ -449,11 +452,11 @@ check_virt() {
 
   case "$virt_serv" in
   *openvz* | *lxc*)
-    warning "Unsupported type of virtualization detected. Please consult with your hosting provider whether your server can run Docker or not. Proceed at your own risk."
-    echo -e -n "* Are you sure you want to proceed? (y/N): "
+    warning "Desteklenmeyen sanallastirma turu algilandi. Lutfen sunucunuzun Docker calistirip calismayacagini barindirma saglayiciniza danisin. Risk alarak devam edebilirsiniz"
+    echo -e -n "* Devam etmek istediğinden emin misin? (y/N): "
     read -r CONFIRM_PROCEED
     if [[ ! "$CONFIRM_PROCEED" =~ [Yy] ]]; then
-      error "Installation aborted!"
+      error "Kurulum iptal edildi!"
       exit 1
     fi
     ;;
@@ -463,16 +466,16 @@ check_virt() {
   esac
 
   if uname -r | grep -q "xxxx"; then
-    error "Unsupported kernel detected."
+    error "Desteklenmeyen taban algılandı."
     exit 1
   fi
 
-  success "System is compatible with docker"
+  success "Sistem docker ile uyumlu!"
 }
 
 # Exit with error status code if user is not root
 if [[ $EUID -ne 0 ]]; then
-  error "This script must be executed with root privileges."
+  error "Bu betik root yetkileriyle calistirilmalidir."
   exit 1
 fi
 
@@ -521,7 +524,7 @@ arm64 | aarch64)
   ARCH=arm64
   ;;
 *)
-  error "Only x86_64 and arm64 are supported!"
+  error "Sadece x86_64 ve arm64 desteklenmektedir!"
   exit 1
   ;;
 esac
@@ -549,7 +552,7 @@ esac
 
 # exit if not supported
 if [ "$SUPPORTED" == false ]; then
-  output "$OS $OS_VER is not supported"
-  error "Unsupported OS"
+  output "$OS $OS_VER desteklenmiyor"
+  error "Desteklenmeyen İşletim Sistemi"
   exit 1
 fi
