@@ -56,7 +56,7 @@ MYSQL_DBHOST_USER="${MYSQL_DBHOST_USER:-pterodactyluser}"
 MYSQL_DBHOST_PASSWORD="${MYSQL_DBHOST_PASSWORD:-}"
 
 if [[ $CONFIGURE_DBHOST == true && -z "${MYSQL_DBHOST_PASSWORD}" ]]; then
-  error "Mysql database host user password is required"
+  error "Mysql veritabani sunucu kullanici sifresi gereklidir"
   exit 1
 fi
 
@@ -70,7 +70,7 @@ enable_services() {
 }
 
 dep_install() {
-  output "Installing dependencies for $OS $OS_VER..."
+  output " $OS $OS_VER icin bagimliliklari yukleme..."
 
   [ "$CONFIGURE_FIREWALL" == true ] && install_firewall && firewall_ports
 
@@ -108,45 +108,45 @@ dep_install() {
 
   enable_services
 
-  success "Dependencies installed!"
+  success "Bagimliliklari yuklendi!"
 }
 
 ptdl_dl() {
-  echo "* Downloading Pterodactyl Wings.. "
+  echo "* Pterodactyl Wings yukleniyor.. "
 
   mkdir -p /etc/pterodactyl
   curl -L -o /usr/local/bin/wings "$WINGS_DL_BASE_URL$ARCH"
 
   chmod u+x /usr/local/bin/wings
 
-  success "Pterodactyl Wings downloaded successfully"
+  success "Pterodactyl Wings basariyla yuklendi!"
 }
 
 systemd_file() {
-  output "Installing systemd service.."
+  output "systemd servisi yukleniyor.."
 
   curl -o /etc/systemd/system/wings.service "$GITHUB_URL"/configs/wings.service
   systemctl daemon-reload
   systemctl enable wings
 
-  success "Installed systemd service!"
+  success "systemd servisi yukleniyor!"
 }
 
 firewall_ports() {
-  output "Opening port 22 (SSH), 8080 (Wings Port), 2022 (Wings SFTP Port)"
+  output "22 (SSH), 8080 (Wings Port), 2022 (Wings SFTP Port) portlari aciliyor.."
 
   [ "$CONFIGURE_LETSENCRYPT" == true ] && firewall_allow_ports "80 443"
   [ "$CONFIGURE_DB_FIREWALL" == true ] && firewall_allow_ports "3306"
 
   firewall_allow_ports "22 8080 2022"
 
-  success "Firewall ports opened!"
+  success "Guvenlik duvari portlari acildi!"
 }
 
 letsencrypt() {
   FAILED=false
 
-  output "Configuring LetsEncrypt.."
+  output "LetsEncrypt konfigure ediliyor.."
 
   # If user has nginx
   systemctl stop nginx || true
@@ -158,20 +158,20 @@ letsencrypt() {
 
   # Check if it succeded
   if [ ! -d "/etc/letsencrypt/live/$FQDN/" ] || [ "$FAILED" == true ]; then
-    warning "The process of obtaining a Let's Encrypt certificate failed!"
+    warning "Let's Encrypt sertifikası olusturulamadi!"
   else
-    success "The process of obtaining a Let's Encrypt certificate succeeded!"
+    success "Let's Encrypt sertifikasi olusturuldu!"
   fi
 }
 
 configure_mysql() {
-  output "Configuring MySQL.."
+  output "MySQL konfigure ediliyor.."
 
   create_db_user "$MYSQL_DBHOST_USER" "$MYSQL_DBHOST_PASSWORD" "$MYSQL_DBHOST_HOST"
   grant_all_privileges "*" "$MYSQL_DBHOST_USER" "$MYSQL_DBHOST_HOST"
 
   if [ "$MYSQL_DBHOST_HOST" != "127.0.0.1" ]; then
-    echo "* Changing MySQL bind address.."
+    echo "* MySQL sunucu adresi degistiriliyor.."
 
     case "$OS" in
     debian | ubuntu)
@@ -185,13 +185,13 @@ configure_mysql() {
     systemctl restart mysqld
   fi
 
-  success "MySQL configured!"
+  success "MySQL konfigure edildi!"
 }
 
 # --------------- Main functions --------------- #
 
 perform_install() {
-  output "Installing pterodactyl wings.."
+  output "Wings kurulmaya baslaniyor.."
   dep_install
   ptdl_dl
   systemd_file
