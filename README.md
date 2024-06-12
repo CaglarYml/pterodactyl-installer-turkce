@@ -1,4 +1,9 @@
-# :bird: Pterodactyl Kurucu
+# :bird: Pterodactyl Kurulum Betiği
+
+
+# Henüz hazır değildir!
+
+
 
 ![Test Panel](https://github.com/pterodactyl-installer/pterodactyl-installer/actions/workflows/panel.yml/badge.svg)
 ![Test Wings](https://github.com/pterodactyl-installer/pterodactyl-installer/actions/workflows/wings.yml/badge.svg)
