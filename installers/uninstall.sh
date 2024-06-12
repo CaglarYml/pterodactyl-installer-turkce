@@ -33,7 +33,7 @@ fn_exists() { declare -F "$1" >/dev/null; }
 if ! fn_exists lib_loaded; then
   # shellcheck source=lib/lib.sh
   source /tmp/lib.sh || source <(curl -sSL "$GITHUB_BASE_URL/$GITHUB_SOURCE"/lib/lib.sh)
-  ! fn_exists lib_loaded && echo "* ERROR: Could not load lib script" && exit 1
+  ! fn_exists lib_loaded && echo "* HATA: Lib betigi yuklenemedi." && exit 1
 fi
 
 # ------------------ Variables ----------------- #
@@ -51,30 +51,30 @@ rm_panel_files() {
   [ "$OS" != "centos" ] && ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
   [ "$OS" == "centos" ] && rm -f /etc/nginx/conf.d/pterodactyl.conf
   systemctl restart nginx
-  success "Removed panel files."
+  success "Panel dosyaları kaldırıldı."
 }
 
 rm_docker_containers() {
-  output "Removing docker containers and images..."
+  output "Docker konteyner ve imajlari kaldiriliyor..."
 
   docker system prune -a -f
 
-  success "Removed docker containers and images."
+  success "Docker konteyner ve imajlari kaldirildi."
 }
 
 rm_wings_files() {
-  output "Removing wings files..."
+  output "Wings dosyalari kaldiriliyor..."
 
   # stop and remove wings service
   systemctl disable --now wings
   rm -rf /etc/systemd/system/wings.service
 
   rm -rf /etc/pterodactyl /usr/local/bin/wings /var/lib/pterodactyl
-  success "Removed wings files."
+  success "Wings dosyalari kaldirildi."
 }
 
 rm_services() {
-  output "Removing services..."
+  output "Servisler kaldiriliyor..."
   systemctl disable --now pteroq
   rm -rf /etc/systemd/system/pteroq.service
   case "$OS" in
@@ -87,21 +87,21 @@ rm_services() {
     rm -rf /etc/php-fpm.d/www-pterodactyl.conf
     ;;
   esac
-  success "Removed services."
+  success "Servisler kaldirildi."
 }
 
 rm_cron() {
-  output "Removing cron jobs..."
+  output "Cronjoblar kaldiriliyor..."
   crontab -l | grep -vF "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1" | crontab -
-  success "Removed cron jobs."
+  success "Cronjoblar kaldirildi."
 }
 
 rm_database() {
-  output "Removing database..."
+  output "Veritabani kaldiriliyor..."
   valid_db=$(mariadb -u root -e "SELECT schema_name FROM information_schema.schemata;" | grep -v -E -- 'schema_name|information_schema|performance_schema|mysql')
-  warning "Be careful! This database will be deleted!"
+  warning "Dikkatli olun! Bu veritabani silinecek!"
   if [[ "$valid_db" == *"panel"* ]]; then
-    echo -n "* Database called panel has been detected. Is it the pterodactyl database? (y/N): "
+    echo -n "* panel adli veritabani tespit edildi. Pterodactyl veritabani midir? (y/N): "
     read -r is_panel
     if [[ "$is_panel" =~ [Yy] ]]; then
       DATABASE=panel
@@ -112,7 +112,7 @@ rm_database() {
     print_list "$valid_db"
   fi
   while [ -z "$DATABASE" ] || [[ $valid_db != *"$database_input"* ]]; do
-    echo -n "* Choose the panel database (to skip don't input anything): "
+    echo -n "* Panel veritabanini girin (atlamak için hicbir sey girmeyin): "
     read -r database_input
     if [[ -n "$database_input" ]]; then
       DATABASE="$database_input"
@@ -122,11 +122,11 @@ rm_database() {
   done
   [[ -n "$DATABASE" ]] && mariadb -u root -e "DROP DATABASE $DATABASE;"
   # Exclude usernames User and root (Hope no one uses username User)
-  output "Removing database user..."
+  output "Veritabani kullanicisi kaldiriliyor..."
   valid_users=$(mariadb -u root -e "SELECT user FROM mysql.user;" | grep -v -E -- 'user|root')
-  warning "Be careful! This user will be deleted!"
+  warning "Dikkatli olun! Bu veritabani kullanicisi silinecek!"
   if [[ "$valid_users" == *"pterodactyl"* ]]; then
-    echo -n "* User called pterodactyl has been detected. Is it the pterodactyl user? (y/N): "
+    echo -n "* ppterodactyl adli veritabani kullanicisi tespit edildi. Pterodactyl veritabanina ait midir? (y/N): "
     read -r is_user
     if [[ "$is_user" =~ [Yy] ]]; then
       DB_USER=pterodactyl
@@ -137,7 +137,7 @@ rm_database() {
     print_list "$valid_users"
   fi
   while [ -z "$DB_USER" ] || [[ $valid_users != *"$user_input"* ]]; do
-    echo -n "* Choose the panel user (to skip don't input anything): "
+    echo -n "* Veritabani kullanicisini girin (atlamak için hicbir sey girmeyin): "
     read -r user_input
     if [[ -n "$user_input" ]]; then
       DB_USER=$user_input
@@ -147,7 +147,7 @@ rm_database() {
   done
   [[ -n "$DB_USER" ]] && mariadb -u root -e "DROP USER $DB_USER@'127.0.0.1';"
   mariadb -u root -e "FLUSH PRIVILEGES;"
-  success "Removed database and database user."
+  success "Veritabani ve veritabani kullanicisi kaldirildi."
 }
 
 # --------------- Main functions --------------- #
